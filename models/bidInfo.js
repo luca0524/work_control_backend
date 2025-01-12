@@ -1,8 +1,8 @@
-const { Sequelize, DataTypes } = require("sequelize");
+const { DataTypes } = require("sequelize");
 const sequelize = require('../config/database');
 
 const BidInfo = sequelize.define(
-    "bidInfos",
+    'BidInfo',
     {
         userId: {
             type: DataTypes.STRING,
@@ -30,8 +30,4 @@ const BidInfo = sequelize.define(
     }    
 );
 
-sequelize.sync().then(() => {
-    console.log('BidInfo table created successfully!');
-}).catch((err) => {
-    console.error('Unable to create table:', err);
-});
+module.exports = BidInfo;

@@ -1,16 +1,23 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const bidRoutes = require('./routes/bidRoutes');
+const cors = require('cors');
 
 require('dotenv').config()
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+const corsOptions = {
+    origin: ['http://localhost:3000'],
+};
+  
+app.use(cors(corsOptions));
+
 app.use(bodyParser.json());
 
 // Routes
-app.use('/bid', bidRoutes);
+app.use('/bidInfo', bidRoutes);
 
 
 app.listen(PORT, () => {

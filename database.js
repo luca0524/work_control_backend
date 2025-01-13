@@ -58,7 +58,7 @@ export async function getBidById(id) {
 
 export async function createBid(first_name, last_name) {
     const month = new Date().getMonth()
-    const day = new Date().getDay()
+    const day = new Date().getDate()
     const week = getDateWeek(new Date());
     const [result] = await connectionDB.query(`
         INSERT INTO bidInfos (userId, month, day, week)

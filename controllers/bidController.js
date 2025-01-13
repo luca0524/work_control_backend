@@ -1,16 +1,60 @@
 const sequelize = require("../config/database.js");
+const url = require('url');
 const BidInfo = require("../models/bidInfo.js");
 const { getDateWeek } = require('../utils.js');
 
-const monthArray = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Agu', 'Sep', 'Oct', 'Nov', 'Dec'];
-
 exports.getAllBidInfos = (req, res) => {
+    const parsedUrl = url.parse(req.url, true); // Parse the URL
+    const userId = parsedUrl.query.userId;     // Extract userId from the query parameters
+    const monthReq = parsedUrl.query.month;
+
+    const month = new Date().getMonth() + 1;
+    const date = new Date().getDate();
+    const week = getDateWeek(new Date());
+
+    if (!userId && !monthReq) {
+        BidInfo.findAll()
+        .then((bidInfos) => {
+            return res.json(bidInfos.filter(item => item.userId === userId && item.month === monthReq));
+        }).catch(error => res.status(500).json({
+            message: 'Internal server error',
+            error: error,
+        }));
+    }
+
     BidInfo.findAll()
-    .then(bidInfos => res.json(bidInfos))
+    .then((bidInfos) => {
+        if (!userId) {
+            bidInfos.forEach(bidInfo => {
+                if (bidInfo.userId == userId && bidInfo.month == month && bidInfo.date == date && bidInfo.week == week) {
+                    return res.json(bidInfo);
+                }
+            })
+        }
+        res.json(bidInfos);
+    })
     .catch(error => res.status(500).json({
         message: 'Internal server error',
         error: error,
     }));
+};
+
+exports.getBidInfoByUserId = async (req, res) => {
+    const userId = parseInt(req.params.userId);
+    const month = new Date().getMonth() + 1;
+    const date = new Date().getDate();
+    const week = getDateWeek(new Date());
+
+    const query = `SELECT count FROM bidInfos WHERE 
+        userId = '${userId}' AND
+        month = '${month}' AND
+        date = '${date}' AND
+        week = '${week}'
+        `;
+
+    const [result] = await sequelize.query(query);
+    console.log(result);
+    res.send(result);
 };
 
 exports.getBidInfoById = async (req, res) => {
@@ -67,9 +111,8 @@ exports.updateBidInfoById = async (req, res) => {
 exports.updateBidInfo = async (req, res) => {
     const { userId, count } = req.body;
 
-    const monthIndex = new Date().getMonth();
-    const month = monthArray[monthIndex];
-    const date = new Date().getDay();
+    const month = new Date().getMonth() + 1;
+    const date = new Date().getDate();
     const week = getDateWeek(new Date());
 
     const query = `SELECT id FROM bidInfos WHERE 
@@ -141,9 +184,8 @@ exports.createBidInfo = async (req, res) => {
         });
     }
 
-    const monthIndex = new Date().getMonth();
-    const month = monthArray[monthIndex];
-    const date = new Date().getDay();
+    const month = new Date().getMonth() + 1;
+    const date = new Date().getDate();
     const week = getDateWeek(new Date());
 
     try{

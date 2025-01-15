@@ -22,7 +22,7 @@ const BidInfo = sequelize.define(
         },
         count: {
             type: DataTypes.INTEGER,
-            defaultValue: 1
+            defaultValue: 0
         }
     },
     {

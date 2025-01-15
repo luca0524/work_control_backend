@@ -57,6 +57,76 @@ exports.getBidInfoByUserId = async (req, res) => {
     res.send(result);
 };
 
+exports.getTodayBidInfo = async (req, res) => {
+    const userId = req.query.userId;
+    const date = new Date().getDate();
+
+    const result = await this.getBidInfoByDate(userId, date);
+
+    if (result.length == 0) { // create new bid row
+        const newBid = await this.createBid(userId);
+        return res.json({
+            message: "Today Bid Info Created.",
+            newBid: newBid
+        });
+    }
+
+    res.send(result);
+};
+
+exports.getLastBidInfo = async (req, res) => {
+    const userId = req.query.userId;
+    const date = new Date().getDate();
+
+    const result = await this.getBidInfoByDate(userId, date - 1);
+
+    res.send(result);
+};
+
+exports.getBidInfoByDate = async (userId, date) => {
+    const month = new Date().getMonth() + 1;
+    const week = getDateWeek(new Date());
+
+    const query = `SELECT count FROM bidInfos WHERE 
+        userId = '${userId}' AND
+        month = '${month}' AND
+        date = '${date}' AND
+        week = '${week}'
+    `;
+
+    const [result] = await sequelize.query(query);
+
+    return result;
+}
+
+exports.getLastWeekBidInfos = async (req, res) => {
+    const userId = req.query.userId;
+    const week = getDateWeek(new Date());
+
+    const query = `SELECT count FROM bidInfos WHERE 
+        userId = '${userId}' AND
+        week = '${week - 1}'
+    `;
+
+    const [result] = await sequelize.query(query);
+
+    res.send(result);
+}
+
+exports.getThisWeekBidInfos = async (req, res) => {
+    const userId = req.query.userId;
+    const week = getDateWeek(new Date());
+
+    const query = `SELECT count FROM bidInfos WHERE 
+        userId = '${userId}' AND
+        week = '${week}'
+    `;
+
+    const [result] = await sequelize.query(query);
+
+    res.send(result);
+}
+
 exports.getBidInfoById = async (req, res) => {
     const id = parseInt(req.params.id);
 
@@ -184,18 +254,8 @@ exports.createBidInfo = async (req, res) => {
         });
     }
 
-    const month = new Date().getMonth() + 1;
-    const date = new Date().getDate();
-    const week = getDateWeek(new Date());
-
     try{
-        const newBid = await BidInfo.create({
-            userId,
-            month,
-            date,
-            week,
-            count
-        });
+        const newBid = await this.createBid(userId);
     
         res.status(201).json({
             message: 'New Bid create.',
@@ -208,3 +268,18 @@ exports.createBidInfo = async (req, res) => {
         });
     }
 };
+
+exports.createBid = async (userId) => {
+    const month = new Date().getMonth() + 1;
+    const date = new Date().getDate();
+    const week = getDateWeek(new Date());
+
+    const newBid = await BidInfo.create({
+        userId,
+        month,
+        date,
+        week,
+    });
+
+    return newBid;
+}

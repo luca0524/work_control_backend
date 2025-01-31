@@ -53,7 +53,6 @@ exports.getBidInfoByUserId = async (req, res) => {
         `;
 
     const [result] = await sequelize.query(query);
-    console.log(result);
     res.send(result);
 };
 
@@ -195,7 +194,6 @@ exports.updateBidInfo = async (req, res) => {
     const [result] = await sequelize.query(query);
     const id = result[0].id;
 
-    console.log(id);
 
     try{
         const bidInfo = await BidInfo.findByPk(id);

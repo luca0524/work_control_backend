@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const bidRoutes = require('./routes/bidRoutes');
+const authRoutes = require('./routes/authRoutes');
 const cors = require('cors');
 
 require('dotenv').config()
@@ -18,6 +19,7 @@ app.use(bodyParser.json());
 
 // Routes
 app.use('/bidInfo', bidRoutes);
+app.use('/auth', authRoutes);
 
 
 app.listen(PORT, () => {
